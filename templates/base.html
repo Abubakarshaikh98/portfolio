@@ -1,0 +1,72 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+            {{ profile.name }} | Portfolio
+        {% endblock %}
+    </title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- Main CSS -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <header>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('home') }}#about">About</a>
+            <a href="{{ url_for('home') }}#skills">Skills</a>
+            <a href="{{ url_for('home') }}#services">Services</a>
+            <a href="{{ url_for('home') }}#projects">Projects</a>
+            <a href="{{ url_for('home') }}#certifications">Certifications</a>
+            <a href="{{ url_for('home') }}#contact">Contact</a>
+        </nav>
+    </header>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main>
+        {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <p>
+            © 2026 {{ profile.name }}. All Rights Reserved.
+        </p>
+    </footer>
+
+
+    <!-- Main JavaScript -->
+    <script
+        src="{{ url_for('static', filename='js/script.js') }}"
+    ></script>
+
+</body>
+</html>
+```

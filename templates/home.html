@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- ================= HERO ================= -->
+    <section id="home">
+
+        <img
+    src="{{ url_for('static', filename='images/profile.png') }}"
+    alt="{{ profile.name }}"
+>
+
+        <p>Hello, I'm</p>
+
+        <h1>{{ profile.name }}</h1>
+
+        <h2>{{ profile.title }}</h2>
+
+        <p>{{ profile.tagline }}</p>
+
+        <a href="#projects">View My Projects</a>
+        <a href="#contact">Contact Me</a>
+
+    </section>
+
+
+    <!-- ================= ABOUT ================= -->
+    <section id="about">
+
+        <h2>About Me</h2>
+
+        <p>{{ profile.summary }}</p>
+
+        <div>
+            {% for stat in profile.stats %}
+                <div>
+                    <strong>{{ stat.value }}{{ stat.suffix }}</strong>
+                    <span>{{ stat.label }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+    </section>
+
+
+    <!-- ================= SKILLS ================= -->
+    <section id="skills">
+
+        <h2>My Skills</h2>
+
+        <div>
+            {% for skill in profile.skills %}
+                <span>{{ skill }}</span>
+            {% endfor %}
+        </div>
+
+    </section>
+
+
+    <!-- ================= SERVICES ================= -->
+    <section id="services">
+
+        <h2>My Services</h2>
+
+        <div>
+            {% for service in profile.services %}
+
+                <article>
+
+                    <i class="fa-solid {{ service.icon }}"></i>
+
+                    <h3>{{ service.title }}</h3>
+
+                    <p>{{ service.desc }}</p>
+
+                </article>
+
+            {% endfor %}
+        </div>
+
+    </section>
+
+
+    <!-- ================= PROJECTS ================= -->
+    <section id="projects">
+
+        <h2>My Projects</h2>
+
+        <div>
+
+            {% for project in profile.projects %}
+
+                <article>
+
+                    <h3>{{ project.name }}</h3>
+
+                    <p>{{ project.description }}</p>
+
+                    <div>
+                        {% for technology in project.technologies %}
+                            <span>{{ technology }}</span>
+                        {% endfor %}
+                    </div>
+
+                    {% if project.github %}
+                        <a
+                            href="{{ project.github }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            GitHub
+                        </a>
+                    {% endif %}
+
+                    {% if project.demo %}
+                        <a
+                            href="{{ project.demo }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Live Demo
+                        </a>
+                    {% endif %}
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= CERTIFICATIONS ================= -->
+    <section id="certifications">
+
+        <h2>Certifications</h2>
+
+        <div>
+
+            {% for certification in profile.certifications %}
+
+                <article>
+
+                    <h3>{{ certification.name }}</h3>
+
+                    <p>{{ certification.issuer }}</p>
+
+                    <span>{{ certification.year }}</span>
+
+                    {% if certification.credential_url %}
+                        <a
+                            href="{{ certification.credential_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            View Credential
+                        </a>
+                    {% endif %}
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= CONTACT ================= -->
+    <section id="contact">
+
+        <h2>Contact Me</h2>
+
+        <p>Let's work together.</p>
+
+        <div>
+
+            {% if profile.social_links.email %}
+                <a href="mailto:{{ profile.social_links.email }}">
+                    <i class="fa-solid fa-envelope"></i>
+                    Email
+                </a>
+            {% endif %}
+
+            {% if profile.social_links.whatsapp %}
+                <a
+                    href="{{ profile.social_links.whatsapp }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-whatsapp"></i>
+                    WhatsApp
+                </a>
+            {% endif %}
+
+            {% if profile.social_links.linkedin %}
+                <a
+                    href="{{ profile.social_links.linkedin }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-linkedin"></i>
+                    LinkedIn
+                </a>
+            {% endif %}
+
+            {% if profile.social_links.github %}
+                <a
+                    href="{{ profile.social_links.github }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-github"></i>
+                    GitHub
+                </a>
+            {% endif %}
+
+            {% if profile.social_links.kaggle %}
+                <a
+                    href="{{ profile.social_links.kaggle }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fa-brands fa-kaggle"></i>
+                    Kaggle
+                </a>
+            {% endif %}
+
+            {% if profile.social_links.fiverr %}
+                <a
+                    href="{{ profile.social_links.fiverr }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Fiverr
+                </a>
+            {% endif %}
+
+        </div>
+        <!-- Contact Form -->
+        <form action="/contact" method="POST">
+
+    <!-- Name -->
+    <div>
+        <label for="name">Name</label>
+
+        <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Your Name"
+            required
+        >
+    </div>
+
+    <!-- Email -->
+    <div>
+        <label for="email">Email</label>
+
+        <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Your Email"
+            required
+        >
+    </div>
+        <!-- Message -->
+
+    <div>
+        <label for="message">Message</label>
+
+        <textarea
+            id="message"
+            name="message"
+            placeholder="Your Message"
+            rows="5"
+            required
+        ></textarea>
+    </div>
+
+    <!-- Send Button -->
+    <button type="submit">Send</button>
+
+</form>
+
+    </section>
+
+
+
+```
+{% endblock %}
