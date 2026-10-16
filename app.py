@@ -1,6 +1,9 @@
 import os
 from PIL import Image
 import sqlite3
+import psycopg
+from psycopg.rows import dict_row
+from supabase import create_client
 import uuid
 Image.MAX_IMAGE_PIXELS = 20_000_000
 from dotenv import load_dotenv
@@ -17,8 +20,94 @@ app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 # PythonAnywhere par Web tab -> Environment variables me SECRET_KEY set karo.
 app.secret_key = os.environ["SECRET_KEY"]
 
+SUPABASE_URL = os.environ.get(
+    "SUPABASE_URL",
+    "https://djqdezsijblkxbimqsyd.supabase.co"
+)
+
+SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY")
+
+supabase = None
+
+if SUPABASE_SECRET_KEY:
+    supabase = create_client(
+        SUPABASE_URL,
+        SUPABASE_SECRET_KEY
+    )
+
+SUPABASE_BUCKET = "portfolio-uploads"
+
+def upload_to_supabase(file, folder):
+    if not supabase:
+        raise RuntimeError("Supabase Storage is not configured.")
+
+    filename = secure_filename(file.filename)
+
+    if not filename:
+        raise ValueError("Invalid filename.")
+
+    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+    storage_path = f"{folder}/{unique_filename}"
+
+    file_bytes = file.read()
+
+    supabase.storage.from_(SUPABASE_BUCKET).upload(
+        path=storage_path,
+        file=file_bytes,
+        file_options={
+            "content-type": file.mimetype or "application/octet-stream",
+            "upsert": "false"
+        }
+    )
+
+    return supabase.storage.from_(SUPABASE_BUCKET).get_public_url(
+        storage_path
+    )
+
 # database.db ka poora rasta (taake PythonAnywhere par bhi sahi file mile)
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
+
+
+
+class DatabaseConnection:
+    def __init__(self, connection, is_postgres=False):
+        self.connection = connection
+        self.is_postgres = is_postgres
+
+    @property
+    def row_factory(self):
+        return getattr(self.connection, "row_factory", None)
+
+    @row_factory.setter
+    def row_factory(self, value):
+        if not self.is_postgres:
+            self.connection.row_factory = value
+
+    def execute(self, query, params=()):
+        if self.is_postgres:
+            query = query.replace("?", "%s")
+        return self.connection.execute(query, params)
+
+    def commit(self):
+        return self.connection.commit()
+
+    def close(self):
+        return self.connection.close()
+
+
+def get_db_connection():
+    database_url = os.environ.get("DATABASE_URL")
+
+    if database_url:
+        connection = psycopg.connect(
+            database_url,
+            row_factory=dict_row,
+            connect_timeout=10
+        )
+        return DatabaseConnection(connection, is_postgres=True)
+
+    connection = sqlite3.connect(DB_PATH)
+    return DatabaseConnection(connection)
 
 
 # -----------------------------------------------------
@@ -111,6 +200,8 @@ PROFILE_DATA = {
 #  2) DATABASE  -  messages ka table banata hai
 # -----------------------------------------------------
 def init_db():
+    if os.environ.get("DATABASE_URL"):
+        return
     con = sqlite3.connect(DB_PATH)
     con.execute("""
         CREATE TABLE IF NOT EXISTS messages (
@@ -129,6 +220,9 @@ init_db()   # website start hote hi table ban jata hai
 # PROJECTS DATABASE TABLE
 # -----------------------------------------------------
 def init_projects_table():
+    if os.environ.get("DATABASE_URL"):
+        return
+
     conn = sqlite3.connect(DB_PATH)
     try:
         conn.execute("""
@@ -162,6 +256,9 @@ init_projects_table()
 
 
 def init_certifications_table():
+    if os.environ.get("DATABASE_URL"):
+        return
+
     conn = sqlite3.connect(DB_PATH)
 
     try:
@@ -191,7 +288,7 @@ init_certifications_table()
 
 @app.route("/")
 def home():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -248,7 +345,7 @@ def contact():
         return redirect(url_for("home") + "#contact")
 
     # Database me message save karo
-    con = sqlite3.connect(DB_PATH)
+    con = get_db_connection()
     try:
         con.execute(
             "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)",
@@ -256,7 +353,7 @@ def contact():
         )
         con.commit()
         flash("Your message has been sent successfully!", "success")
-    except sqlite3.Error:
+    except (sqlite3.Error, psycopg.Error):
         flash("Unable to save your message. Please try again.", "error")
     finally:
         con.close()
@@ -274,7 +371,7 @@ def page_not_found(e):
 
 @app.route("/api/projects")
 def api_projects():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -293,7 +390,7 @@ def api_projects():
 
 @app.route("/api/certifications")
 def api_certifications():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -354,7 +451,7 @@ def admin_messages():
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -371,7 +468,7 @@ def admin_projects():
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -404,7 +501,7 @@ def admin_add_project():
         demo = request.form.get("demo", "").strip()
         image_file = request.files.get("image")
         image = ""
-        featured = 1 if request.form.get("featured") == "yes" else 0
+        featured = request.form.get("featured") == "yes"
 
         if not name or not category or not description:
             flash("Please fill all required fields.", "error")
@@ -432,22 +529,28 @@ def admin_add_project():
             if image_format not in allowed_formats:
                 flash("Please upload a JPG, PNG, WEBP, or GIF image.", "error")
                 return render_template("admin/add_project.html")
-
-            filename = f"{uuid.uuid4().hex}.{allowed_formats[image_format]}"
-            upload_dir = os.path.join(app.static_folder, "uploads")
-            os.makedirs(upload_dir, exist_ok=True)
-
             image_file.stream.seek(0)
-            img = Image.open(image_file.stream)
-            img.save(os.path.join(upload_dir, filename))
 
-            image = f"uploads/{filename}"
+            if supabase:
+                image_file.filename = (
+                    f"{uuid.uuid4().hex}.{allowed_formats[image_format]}"
+                )
+                image = upload_to_supabase(image_file, "projects")
+            else:
+                filename = f"{uuid.uuid4().hex}.{allowed_formats[image_format]}"
+                upload_dir = os.path.join(app.static_folder, "uploads")
+                os.makedirs(upload_dir, exist_ok=True)
+
+                img = Image.open(image_file.stream)
+                img.save(os.path.join(upload_dir, filename))
+
+                image = f"uploads/{filename}"
 
         except (Image.UnidentifiedImageError, Image.DecompressionBombError, OSError):
             flash("Invalid image file. Please choose a valid image.", "error")
             return render_template("admin/add_project.html")
 
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_db_connection()
         try:
             conn.execute("""
                 INSERT INTO projects
@@ -471,7 +574,7 @@ def admin_delete_project(project_id):
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
 
     try:
         conn.execute(
@@ -490,7 +593,7 @@ def admin_edit_project(project_id):
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -510,7 +613,7 @@ def admin_edit_project(project_id):
             github = request.form.get("github", "").strip()
             demo = request.form.get("demo", "").strip()
             image = request.form.get("image", "").strip()
-            featured = 1 if request.form.get("featured") == "yes" else 0
+            featured = request.form.get("featured") == "yes"
 
             if not name or not category or not description:
                 flash("Please fill all required fields.", "error")
@@ -545,7 +648,7 @@ def admin_certifications():
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -570,7 +673,7 @@ def admin_skills():
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -599,7 +702,7 @@ def admin_add_skill():
         flash("Please enter a skill name.", "error")
         return redirect(url_for("admin_skills"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
 
     try:
         conn.execute(
@@ -619,7 +722,7 @@ def admin_delete_skill(skill_id):
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
 
     try:
         conn.execute(
@@ -693,18 +796,25 @@ def admin_add_certification():
                 )
                 return render_template("admin/add_certification.html")
 
-            filename = f"{uuid.uuid4().hex}.{extension}"
-            upload_folder = os.path.join(
-                app.root_path, "static", "uploads"
-            )
-            os.makedirs(upload_folder, exist_ok=True)
+            if supabase:
+                uploaded_file.filename = (
+                    f"{uuid.uuid4().hex}.{extension}"
+                )
+                image = upload_to_supabase(
+                uploaded_file, "certifications"
+                )
+            else:
+                filename = f"{uuid.uuid4().hex}.{extension}"
+                upload_folder = os.path.join(
+                    app.root_path, "static", "uploads"
+                )
+                os.makedirs(upload_folder, exist_ok=True)
 
-            uploaded_file.save(
+                uploaded_file.save(
                 os.path.join(upload_folder, filename)
-            )
-            image = f"static/uploads/{filename}"
-
-        conn = sqlite3.connect(DB_PATH)
+                )
+                image = f"static/uploads/{filename}"
+        conn = get_db_connection()
 
         try:
             conn.execute("""
@@ -729,7 +839,7 @@ def admin_delete_certification(certification_id):
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
 
     try:
         conn.execute(
@@ -751,7 +861,7 @@ def admin_edit_certification(certification_id):
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
 
     try:
@@ -820,17 +930,24 @@ def admin_edit_certification(certification_id):
                         certification=certification
                     )
 
-                filename = f"{uuid.uuid4().hex}.{extension}"
-                upload_folder = os.path.join(
-                    app.root_path, "static", "uploads"
-                )
-                os.makedirs(upload_folder, exist_ok=True)
+                if supabase:
+                    uploaded_file.filename = (
+                        f"{uuid.uuid4().hex}.{extension}"
+                    )
+                    image = upload_to_supabase(
+                        uploaded_file, "certifications"
+                    )
+                else:
+                    filename = f"{uuid.uuid4().hex}.{extension}"
+                    upload_folder = os.path.join(
+                        app.root_path, "static", "uploads"
+                    )
+                    os.makedirs(upload_folder, exist_ok=True)
 
-                uploaded_file.save(
-                    os.path.join(upload_folder, filename)
-                )
-                image = f"static/uploads/{filename}"
-
+                    uploaded_file.save(
+                        os.path.join(upload_folder, filename)
+                    )
+                    image = f"static/uploads/{filename}"
 
             if not name or not issuer:
                 flash(

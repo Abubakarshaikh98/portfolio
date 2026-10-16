@@ -23,4 +23,9 @@ env/
 
 # OS files
 .DS_Store
-Thumbs.db
+Thumbs.dbapp.py.backup
+
+app.py.backup
+
+# Local migration backups
+*.migration-backup
