@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Certifications</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back {
+            background: #475569;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="top">
+            <div>
+                <h1>Manage Certifications</h1>
+                <p class="muted">View your saved certificates.</p>
+            </div>
+
+            <div>
+                <a class="btn back"
+                   href="{{ url_for('admin_dashboard') }}">
+                    Dashboard
+                </a>
+
+                <a class="btn"
+                   href="{{ url_for('admin_add_certification') }}">
+                    + Add Certification
+                </a>
+            </div>
+        </div>
+
+        {% for cert in certifications %}
+            <div class="card">
+                <h2>{{ cert.name }}</h2>
+                <p><strong>Issuer:</strong> {{ cert.issuer }}</p>
+                <p><strong>Year:</strong> {{ cert.year }}</p>
+
+                {% if cert.image %}
+                    <img
+                        src="{{ url_for('static', filename=cert.image.replace('static/', '')) }}"
+                        alt="{{ cert.name }}"
+                        style="width: 150px; max-height: 180px; object-fit: contain; border-radius: 8px; margin: 10px 0;">
+                {% endif %}
+
+                {% if cert.credential_url %}
+                    <p>
+                        <a href="{{ cert.credential_url }}"
+                           target="_blank" rel="noopener noreferrer">
+                            View Certificate
+                        </a>
+                    </p>
+                {% endif %}
+
+                {% if cert.id is defined %}
+                    <a
+                        href="{{ url_for('admin_edit_certification', certification_id=cert.id) }}"
+                        style="display: inline-block; background: #2563eb; color: white; padding: 9px 14px; border-radius: 6px; text-decoration: none; margin-right: 8px;">
+                        Edit Certification
+                    </a>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('admin_delete_certification', certification_id=cert.id) }}"
+                        onsubmit="return confirm('Are you sure you want to delete this certification?');"
+                        style="display: inline-block;">
+
+                        <button
+                            type="submit"
+                            style="background: #dc2626; color: white; padding: 9px 14px; border: none; border-radius: 6px; cursor: pointer;">
+                            Delete Certification
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="card empty">
+                No certifications found.
+            </div>
+        {% endfor %}
+    </main>
+</body>
+</html>

@@ -1,292 +1,272 @@
 {% extends "base.html" %}
-
 {% block content %}
-    <!-- ================= HERO ================= -->
-    <section id="home">
 
+{# Chhota naam, taake baar baar profile.social_links na likhna pade #}
+{% set s = profile.social_links %}
+
+
+{# ================= 1) HOME ================= #}
+<section id="home" class="hero">
+  <div class="w hero-grid">
+    <div>
+      <span class="tag">{{ profile.title }}</span>
+      <h1>Hi, I'm <em>{{ profile.name }}</em></h1>
+      <p class="lead">{{ profile.lead }}</p>
+      <p class="muted">{{ profile.summary }}</p>
+
+      <div class="row">
+        <a href="#projects" class="btn btn-primary">View Projects</a>
+        <a href="#contact" class="btn btn-secondary">Contact Me</a>
+      </div>
+
+      {# Social links: sirf wohi dikhte hain jo app.py me bhare hain #}
+      <div class="soc">
+        {% if s.github %}<a href="{{ s.github }}" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>{% endif %}
+        {% if s.linkedin %}<a href="{{ s.linkedin }}" target="_blank"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>{% endif %}
+        {% if s.fiverr %}<a href="{{ s.fiverr }}" target="_blank"><i class="fa-solid fa-briefcase"></i> Fiverr</a>{% endif %}
+        {% if s.email %}<a href="mailto:{{ s.email }}"><i class="fa-solid fa-envelope"></i> Email</a>{% endif %}
+      </div>
+    </div>
+
+    {# Tumhari photo: static/images/profile.png #}
+    <div class="photo">
+      <img src="{{ url_for('static', filename='images/profile.png') }}" alt="{{ profile.name }}">
+    </div>
+  </div>
+</section>
+
+
+{# ================= 2) ABOUT ================= #}
+<section id="about" class="alt">
+  <div class="w about">
+    <div>
+      <span class="tag">About Me</span>
+      <h2>Turning Ideas into Intelligent Solutions</h2>
+      <p class="muted">I am an AI &amp; Data Science professional with a strong foundation in machine learning, deep learning and modern AI tools. I enjoy building real-world projects that solve meaningful problems through data, automation and intelligent systems.</p>
+
+      <div class="pts">
+        <div><i class="fa-solid fa-lightbulb"></i><span><b>Problem Solver</b>I focus on practical solutions that create real value.</span></div>
+        <div><i class="fa-solid fa-book-open"></i><span><b>Continuous Learner</b>Always exploring new tools, techniques and technologies.</span></div>
+        <div><i class="fa-solid fa-bullseye"></i><span><b>Goal Oriented</b>Committed to growth and long-term success.</span></div>
+      </div>
+
+      {# Resume button tabhi aata hai jab app.py me "resume" bhara ho #}
+      {% if profile.resume %}
+        <a class="btn btn-primary" href="{{ url_for('static', filename=profile.resume) }}" download>Download Resume</a>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="photo sq"><img src="{{ url_for('static', filename='images/profile1.png') }}" alt=""></div>
+      <div class="pill">{{ profile.title }}</div>
+    </div>
+  </div>
+</section>
+
+
+{# ================= 3) SKILLS ================= #}
+<section id="skills">
+  <div class="w">
+    <span class="tag">My Skills</span>
+    <h2>Technologies I Work With</h2>
+    <p class="sub">I work with a range of modern tools and technologies to build machine learning models, AI applications and automation workflows.</p>
+
+    <div class="g4">
+      {# app.py ki skills list me jitni entries, utne cards #}
+      {% for skill in profile.skills %}
+        <div class="card sk">
+          <i class="{{ skill.icon|default('fa-solid fa-code', true) }}"></i>
+          {{ skill.name }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+{# ================= 4) SERVICES ================= #}
+<section id="services" class="alt">
+  <div class="w">
+    <span class="tag">Services</span>
+    <h2>What I Offer</h2>
+    <p class="sub">I provide AI and data-driven solutions to help businesses automate processes, improve efficiency and achieve their goals.</p>
+
+    <div class="g2">
+      {% for service in profile.services %}
+        <div class="card sv">
+          <div class="ic"><i class="fa-solid {{ service.icon }}"></i></div>
+          <h3>{{ service.title }}</h3>
+          <ul>
+            {% for point in service.points %}<li>{{ point }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="row"><a href="#contact" class="btn btn-primary">Let's Work Together</a></div>
+  </div>
+</section>
+
+
+{# ================= 5) PROJECTS ================= #}
+<section id="projects">
+  <div class="w">
+    <span class="tag">Featured Projects</span>
+    <h2>Real Projects. Real Solutions.</h2>
+    <p class="sub">Here are some of my featured projects that showcase my skills in machine learning, generative AI and automation.</p>
+
+    <div class="g2">
+      {% for project in profile.projects %}
+        {% if project.featured %}   {# sirf featured=True wale #}
+          <div class="card pj">
+            <div class="th">
+              {% if project.image %}
+                <img
+                  src="{{ url_for('static', filename=project.image.replace('static/', '')) }}"
+                  alt="{{ project.name }}"
+                  loading="lazy">
+              {% else %}
+                <i class="fa-solid {{ project.icon }}"></i>
+              {% endif %}
+            </div>
+
+            <h3>{{ project.name }}</h3>
+            <span class="cat">{{ project.category }}</span>
+            <p class="muted">{{ project.description }}</p>
+            <div class="row sm-row">
+              {% if project.demo %}<a class="btn btn-primary sm" href="{{ project.demo }}" target="_blank">Live Demo</a>{% endif %}
+              {% if project.github %}<a class="btn btn-secondary sm" href="{{ project.github }}" target="_blank">GitHub</a>{% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="more-head">
+      <span class="tag">Additional Projects</span>
+      <h2>More Projects</h2>
+      <p class="sub">These are some of my other completed projects that demonstrate my skills in data science and machine learning.</p>
+    </div>
+
+    <div class="g2">
+      {% for project in profile.projects %}
+        {% if not project.featured %}   {# featured=False wale #}
+          <div class="card pj">
+            <div class="th">
+              {% if project.image %}
+                <img
+                  src="{{ url_for('static', filename=project.image.replace('static/', '')) }}"
+                  alt="{{ project.name }}"
+                  loading="lazy">
+              {% else %}
+                <i class="fa-solid {{ project.icon or 'fa-code' }}"></i>
+              {% endif %}
+            </div>
+            <h3>{{ project.name }}</h3>
+            <span class="cat">{{ project.category }}</span>
+            <p class="muted">{{ project.description }}</p>
+            <div class="row sm-row">
+              {% if project.demo %}<a class="btn btn-primary sm" href="{{ project.demo }}" target="_blank">Live Demo</a>{% endif %}
+              {% if project.github %}<a class="btn btn-secondary sm" href="{{ project.github }}" target="_blank">GitHub</a>{% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+
+{# ================= 6) CERTIFICATIONS ================= #}
+<section id="certifications" class="alt">
+  <div class="w">
+    <span class="tag">Credentials</span>
+    <h2>My Certifications</h2>
+    <p class="sub">
+      I continuously upgrade my skills through trusted platforms and official certifications.
+    </p>
+
+    <div class="g3 certs">
+      {% for cert in profile.certifications %}
+        <div class="card cr">
+          <div class="th certificate-image">
+            {% if cert.image is defined and cert.image %}
+              <img
+                src="{{ url_for('static', filename=cert.image.replace('static/', '')) }}"
+                alt="{{ cert.name }} certificate"
+                loading="lazy">
+            {% else %}
+              <i class="fa-solid fa-certificate"></i>
+            {% endif %}
+          </div>
+
+          <h3>{{ cert.name }}</h3>
+          <p class="muted">{{ cert.issuer }} — {{ cert.year }}</p>
+
+          {% if cert.credential_url %}
+            <a class="btn btn-secondary sm"
+               href="{{ cert.credential_url }}"
+               target="_blank">
+              View Certificate
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="card q learning-card">
         <img
-    src="{{ url_for('static', filename='images/profile.png') }}"
-    alt="{{ profile.name }}"
->
+          src="{{ url_for('static', filename='images/continuous-learning.png') }}"
+          alt="Continuous learning workspace"
+          loading="lazy">
 
-        <p>Hello, I'm</p>
-
-        <h1>{{ profile.name }}</h1>
-
-        <h2>{{ profile.title }}</h2>
-
-        <p>{{ profile.tagline }}</p>
-
-        <a href="#projects">View My Projects</a>
-        <a href="#contact">Contact Me</a>
-
-    </section>
-
-
-    <!-- ================= ABOUT ================= -->
-    <section id="about">
-
-        <h2>About Me</h2>
-
-        <p>{{ profile.summary }}</p>
-
-        <div>
-            {% for stat in profile.stats %}
-                <div>
-                    <strong>{{ stat.value }}{{ stat.suffix }}</strong>
-                    <span>{{ stat.label }}</span>
-                </div>
-            {% endfor %}
+        <div class="learning-caption">
+          <h3>Continuous Learning</h3>
+          <p>Builds a Better Future</p>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    </section>
+{# ================= 7) CONTACT ================= #}
+<section id="contact">
+  <div class="w ct">
 
-
-    <!-- ================= SKILLS ================= -->
-    <section id="skills">
-
-        <h2>My Skills</h2>
-
-        <div>
-            {% for skill in profile.skills %}
-                <span>{{ skill }}</span>
-            {% endfor %}
-        </div>
-
-    </section>
-
-
-    <!-- ================= SERVICES ================= -->
-    <section id="services">
-
-        <h2>My Services</h2>
-
-        <div>
-            {% for service in profile.services %}
-
-                <article>
-
-                    <i class="fa-solid {{ service.icon }}"></i>
-
-                    <h3>{{ service.title }}</h3>
-
-                    <p>{{ service.desc }}</p>
-
-                </article>
-
-            {% endfor %}
-        </div>
-
-    </section>
-
-
-    <!-- ================= PROJECTS ================= -->
-    <section id="projects">
-
-        <h2>My Projects</h2>
-
-        <div>
-
-            {% for project in profile.projects %}
-
-                <article>
-
-                    <h3>{{ project.name }}</h3>
-
-                    <p>{{ project.description }}</p>
-
-                    <div>
-                        {% for technology in project.technologies %}
-                            <span>{{ technology }}</span>
-                        {% endfor %}
-                    </div>
-
-                    {% if project.github %}
-                        <a
-                            href="{{ project.github }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            GitHub
-                        </a>
-                    {% endif %}
-
-                    {% if project.demo %}
-                        <a
-                            href="{{ project.demo }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Live Demo
-                        </a>
-                    {% endif %}
-
-                </article>
-
-            {% endfor %}
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= CERTIFICATIONS ================= -->
-    <section id="certifications">
-
-        <h2>Certifications</h2>
-
-        <div>
-
-            {% for certification in profile.certifications %}
-
-                <article>
-
-                    <h3>{{ certification.name }}</h3>
-
-                    <p>{{ certification.issuer }}</p>
-
-                    <span>{{ certification.year }}</span>
-
-                    {% if certification.credential_url %}
-                        <a
-                            href="{{ certification.credential_url }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            View Credential
-                        </a>
-                    {% endif %}
-
-                </article>
-
-            {% endfor %}
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= CONTACT ================= -->
-    <section id="contact">
-
-        <h2>Contact Me</h2>
-
-        <p>Let's work together.</p>
-
-        <div>
-
-            {% if profile.social_links.email %}
-                <a href="mailto:{{ profile.social_links.email }}">
-                    <i class="fa-solid fa-envelope"></i>
-                    Email
-                </a>
-            {% endif %}
-
-            {% if profile.social_links.whatsapp %}
-                <a
-                    href="{{ profile.social_links.whatsapp }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fa-brands fa-whatsapp"></i>
-                    WhatsApp
-                </a>
-            {% endif %}
-
-            {% if profile.social_links.linkedin %}
-                <a
-                    href="{{ profile.social_links.linkedin }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fa-brands fa-linkedin"></i>
-                    LinkedIn
-                </a>
-            {% endif %}
-
-            {% if profile.social_links.github %}
-                <a
-                    href="{{ profile.social_links.github }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fa-brands fa-github"></i>
-                    GitHub
-                </a>
-            {% endif %}
-
-            {% if profile.social_links.kaggle %}
-                <a
-                    href="{{ profile.social_links.kaggle }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fa-brands fa-kaggle"></i>
-                    Kaggle
-                </a>
-            {% endif %}
-
-            {% if profile.social_links.fiverr %}
-                <a
-                    href="{{ profile.social_links.fiverr }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Fiverr
-                </a>
-            {% endif %}
-
-        </div>
-        <!-- Contact Form -->
-        <form action="/contact" method="POST">
-
-    <!-- Name -->
+    {# Left side: contact links #}
     <div>
-        <label for="name">Name</label>
+      <span class="tag">Get In Touch</span>
+      <h2>Let's Work Together</h2>
+      <p class="sub">Have a project in mind or want to discuss an opportunity? Feel free to reach out. I'd love to hear from you.</p>
 
-        <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Your Name"
-            required
-        >
+      {% if s.email %}<a class="ci" href="mailto:{{ s.email }}"><span class="ic"><i class="fa-solid fa-envelope"></i></span><span><b>Email</b><small>{{ s.email }}</small></span></a>{% endif %}
+      {% if s.whatsapp %}<a class="ci" href="{{ s.whatsapp }}" target="_blank"><span class="ic"><i class="fa-brands fa-whatsapp"></i></span><span><b>WhatsApp</b><small>Message me</small></span></a>{% endif %}
+      {% if s.linkedin %}<a class="ci" href="{{ s.linkedin }}" target="_blank"><span class="ic"><i class="fa-brands fa-linkedin-in"></i></span><span><b>LinkedIn</b><small>View profile</small></span></a>{% endif %}
+      {% if s.github %}<a class="ci" href="{{ s.github }}" target="_blank"><span class="ic"><i class="fa-brands fa-github"></i></span><span><b>GitHub</b><small>View repositories</small></span></a>{% endif %}
+      {% if s.fiverr %}<a class="ci" href="{{ s.fiverr }}" target="_blank"><span class="ic"><i class="fa-solid fa-briefcase"></i></span><span><b>Fiverr</b><small>Hire me</small></span></a>{% endif %}
     </div>
 
-    <!-- Email -->
-    <div>
-        <label for="email">Email</label>
+    {# Right side: form. Submit par app.py ka contact() chalta hai #}
+    <form class="card" action="{{ url_for('contact') }}" method="POST">
+      <h3>Send a Message</h3>
 
-        <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Your Email"
-            required
-        >
-    </div>
-        <!-- Message -->
+      {# "Message sent" ya error yahan dikhta hai #}
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
 
-    <div>
-        <label for="message">Message</label>
+      <div class="two">
+        <div><label for="name">Name</label><input type="text" id="name" name="name" placeholder="Your name" required></div>
+        <div><label for="email">Email</label><input type="email" id="email" name="email" placeholder="Your email" required></div>
+      </div>
 
-        <textarea
-            id="message"
-            name="message"
-            placeholder="Your Message"
-            rows="5"
-            required
-        ></textarea>
-    </div>
+      <div><label for="message">Message</label><textarea id="message" name="message" rows="5" placeholder="Your message" required></textarea></div>
 
-    <!-- Send Button -->
-    <button type="submit">Send</button>
+      {# Chhupa hua field: insaan nahi dekhta, spam bots bhar dete hain #}
+      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off">
 
-</form>
-
-    </section>
-
-
-
-```
+      <button type="submit" class="btn btn-primary">Send Message</button>
+    </form>
+  </div>
+</section>
 {% endblock %}

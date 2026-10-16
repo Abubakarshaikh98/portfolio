@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Messages | Portfolio Admin</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        header {
+            background: #0f172a;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .back {
+            color: white;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .message-card {
+            background: white;
+            padding: 22px;
+            margin-bottom: 18px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            overflow-wrap: anywhere;
+        }
+
+        .message-card h2 {
+            font-size: 18px;
+            margin: 0 0 8px;
+        }
+
+        .email {
+            color: #2563eb;
+            margin-bottom: 15px;
+        }
+
+        .message-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .empty {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Contact Messages</h1>
+        <a class="back" href="{{ url_for('admin_dashboard') }}">
+            ← Back to Dashboard
+        </a>
+    </header>
+
+    <main>
+        {% if messages %}
+            {% for message in messages %}
+                <article class="message-card">
+                    <h2>{{ message["name"] }}</h2>
+
+                    <div class="email">
+                        <a href="mailto:{{ message['email'] }}">
+                            {{ message["email"] }}
+                        </a>
+                    </div>
+
+                    <div class="message-text">{{ message["message"] }}</div>
+                </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <h2>No messages yet</h2>
+                <p>Messages submitted through your contact form will appear here.</p>
+            </div>
+        {% endif %}
+    </main>
+</body>
+</html>

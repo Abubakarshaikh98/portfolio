@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Skills</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        input, select, button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px;
+            margin: 8px 0 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .skill {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+
+        .skill form {
+            margin: 0;
+        }
+
+        .skill button {
+            width: auto;
+            margin: 0;
+            background: #dc2626;
+        }
+
+        a {
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manage Skills</h1>
+    <p><a href="{{ url_for('admin_dashboard') }}">← Back to Dashboard</a></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+        <h2>Add New Skill</h2>
+
+        <form method="POST" action="{{ url_for('admin_add_skill') }}">
+            <label for="name">Skill Name</label>
+            <input id="name" name="name" type="text" required>
+
+            <label for="category">Category</label>
+            <select id="category" name="category">
+                <option value="Programming">Programming</option>
+                <option value="AI & Machine Learning">AI & Machine Learning</option>
+                <option value="Automation">Automation</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Tools">Tools</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="level">Level</label>
+            <select id="level" name="level">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+            </select>
+
+            <button type="submit">Add Skill</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Existing Skills</h2>
+
+        {% if skills %}
+            {% for skill in skills %}
+                <div class="skill">
+                    <div>
+                        <strong>{{ skill.name }}</strong><br>
+                        <small>{{ skill.category }} · {{ skill.level }}</small>
+                    </div>
+
+                    <form method="POST"
+                          action="{{ url_for('admin_delete_skill', skill_id=skill.id) }}"
+                          onsubmit="return confirm('Delete this skill?');">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No skills added yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

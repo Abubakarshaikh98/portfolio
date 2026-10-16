@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Project | Admin</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 30px 15px;
+            color: #1f2937;
+        }
+
+        .form-card {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 7px;
+            font-weight: bold;
+        }
+
+        input:not([type="checkbox"]), textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 18px 0;
+        }
+
+        .checkbox-row label {
+            margin: 0;
+        }
+
+        button, .cancel-link {
+            display: inline-block;
+            padding: 12px 18px;
+            border: 0;
+            border-radius: 6px;
+            font: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+        }
+
+        .cancel-link {
+            background: #e5e7eb;
+            color: #111827;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <main class="form-card">
+        <h1>Edit Project</h1>
+        <p>Update your project details below.</p>
+
+        <form method="POST"
+              action="{{ url_for('admin_edit_project', project_id=project['id']) }}">
+
+            <label for="name">Project Name *</label>
+            <input id="name" name="name" type="text"
+                   maxlength="120" value="{{ project['name'] }}"
+                   required>
+
+            <label for="category">Category *</label>
+            <input id="category" name="category" type="text"
+                   maxlength="100" value="{{ project['category'] }}"
+                   required>
+
+            <label for="description">Description *</label>
+            <textarea id="description" name="description"
+                      maxlength="1000" required>{{ project['description'] }}</textarea>
+
+            <label for="github">GitHub URL</label>
+            <input id="github" name="github" type="url"
+                   maxlength="500" value="{{ project['github'] or '' }}">
+
+            <label for="demo">Live Demo URL</label>
+            <input id="demo" name="demo" type="url"
+                   maxlength="500" value="{{ project['demo'] or '' }}">
+
+            <label for="image">Project Image Path</label>
+            <input id="image" name="image" type="text"
+                   maxlength="300" value="{{ project['image'] or '' }}">
+
+            <div class="checkbox-row">
+                <input id="featured" name="featured" type="checkbox"
+                       value="yes"
+                       {% if project['featured'] %}checked{% endif %}>
+                <label for="featured">Featured Project</label>
+            </div>
+
+            <button type="submit">Update Project</button>
+            <a class="cancel-link"
+               href="{{ url_for('admin_projects') }}">Cancel</a>
+        </form>
+    </main>
+</body>
+</html>

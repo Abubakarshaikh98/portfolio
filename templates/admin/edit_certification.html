@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Certification</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+            color: #222;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px #0000000d;
+        }
+
+        label {
+            display: block;
+            margin: 16px 0 7px;
+            font-weight: bold;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 16px;
+            margin-top: 20px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .back {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Edit Certification</h1>
+        <p>Update the certificate details below.</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label for="name">Certificate Name *</label>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                value="{{ certification.name }}"
+                required>
+
+            <label for="issuer">Issuing Organization *</label>
+            <input
+                type="text"
+                id="issuer"
+                name="issuer"
+                value="{{ certification.issuer }}"
+                required>
+
+            <label for="year">Year</label>
+            <input
+                type="text"
+                id="year"
+                name="year"
+                value="{{ certification.year }}">
+
+            <label for="credential_url">Credential URL</label>
+            <input
+                type="url"
+                id="credential_url"
+                name="credential_url"
+                value="{{ certification.credential_url }}">
+
+            <label for="image">Upload Certificate Image</label>
+            <input
+                type="file"
+                id="image"
+                name="image"
+                accept=".png,.jpg,.jpeg,.webp">
+
+            <p class="hint">
+                Select a PNG, JPG, JPEG, or WEBP image.
+            </p>
+            {% if certification.image %}
+                <p>Current image:</p>
+                <img
+                    src="{{ url_for('static', filename=certification.image.replace('static/', '')) }}"
+                    alt="{{ certification.name }}"
+                    style="width: 150px; max-height: 180px; object-fit: contain;">
+            {% endif %}
+
+            <button class="btn" type="submit">
+                Update Certification
+            </button>
+
+            <a class="btn back"
+               href="{{ url_for('admin_certifications') }}">
+                Cancel
+            </a>
+        </form>
+    </main>
+</body>
+</html>

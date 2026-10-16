@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        header {
+            background: #0f172a;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .logout {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 19px;
+        }
+
+        .card p {
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 6px 10px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Portfolio Admin</h1>
+
+        <form method="POST" action="{{ url_for('admin_logout') }}">
+            <button class="logout" type="submit">Logout</button>
+        </form>
+    </header>
+
+    <main>
+        <div class="welcome">
+            <h2>Welcome to your dashboard!</h2>
+            <p>Manage your portfolio content from one place.</p>
+            <span class="status">Admin logged in</span>
+        </div>
+
+        <div class="cards">
+            <a href="{{ url_for('admin_projects') }}"
+               style="display: block; color: inherit; text-decoration: none;">
+                <div class="card">
+        <h2>Projects</h2>
+        <p>Manage your portfolio projects.</p>
+    </div>
+</a>
+
+            <a href="{{ url_for('admin_skills') }}"
+               style="display: block; color: inherit; text-decoration: none;">
+                <div class="card">
+                    <h2>Skills</h2>
+                    <p>Manage the skills displayed on your website.</p>
+                </div>
+            </a>
+
+            
+<a href="{{ url_for('admin_certifications') }}"
+   style="display: block; color: inherit; text-decoration: none;">
+    <div class="card">
+        <h2>Certifications</h2>
+        <p>Manage your certificates.</p>
+    </div>
+</a>
+
+
+            <a href="{{ url_for('admin_messages') }}"
+               style="display: block; color: inherit; text-decoration: none;">
+                <div class="card">
+                    <h2>Contact Messages</h2>
+                    <p>Review messages submitted through your contact form.</p>
+                </div>
+            </a>
+        </div>
+    </main>
+</body>
+</html>
